@@ -3,13 +3,28 @@ import { Button, TextField, Stack } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 
+// Define strongly-typed interfaces for the API payload
+interface EldEvent {
+  driverId: string;
+  availableHours: number;
+  dutyStatus: string;
+  recordedAt: string;
+}
+
+interface EldPayload {
+  vendorId: string;
+  driverId: string;
+  events: EldEvent[];
+}
+
 export function UpdateHosForm() {
   const qc = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: (payload: any) => api.post("/eld/events", payload),
-    onSuccess: (_, vars: any) => {
-      // invalidate cache so HosStatusCard refreshes
+  // Use generics to provide strong types for the mutation's data and variables
+  const mutation = useMutation<unknown, Error, EldPayload>({
+    mutationFn: (payload) => api.post("/eld/events", payload),
+    onSuccess: (_, vars) => {
+      // `vars` is now correctly typed as EldPayload
       qc.invalidateQueries({ queryKey: ["hos", vars.driverId] });
     }
   });
@@ -28,7 +43,7 @@ export function UpdateHosForm() {
           events: [{
             driverId,
             availableHours: Number(fd.get("hours")),
-            dutyStatus: fd.get("status"),
+            dutyStatus: fd.get("status") as string, // Explicitly cast form value
             recordedAt: new Date().toISOString()
           }]
         });
