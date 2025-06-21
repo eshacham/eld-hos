@@ -1,14 +1,19 @@
+import { useState } from "react";
 import { Container, Box } from "@mui/material";
 import { HosStatusCard } from "./components/HosStatusCard";
 import { UpdateHosForm } from "./components/UpdateHosForm";
+import { DriverSearch } from "./components/DriverSearch";
 
 export default function App() {
-  const driverId = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+  const [driverId, setDriverId] = useState("");
+
   return (
     <Container sx={{ mt: 4 }}>
-      <UpdateHosForm />
+      <DriverSearch onSelect={setDriverId} />
       <Box sx={{ my: 4 }} />
-      <HosStatusCard driverId={driverId} />
+      {driverId && <HosStatusCard driverId={driverId} />}
+      <Box sx={{ my: 4 }} />
+      <UpdateHosForm />
     </Container>
   );
 }
