@@ -1,8 +1,8 @@
 using HosDemo.Api.Data;
 using HosDemo.Api.Services;
-using Microsoft.EntityFrameworkCore;
 using HosDemo.Api.Transport;
 using HosDemo.Api.Domain;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,12 +12,18 @@ var conn = builder.Configuration.GetConnectionString("Postgres")
 
 // ─── DI  ───────────────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<HosDbContext>(o => o.UseNpgsql(conn));
+
 builder.Services.AddScoped<IDriverRepository, SqlDriverRepository>();
 builder.Services.AddScoped<IEldNormalizer, SmartNormalizer>();
 
+// ✨  NEW: add MVC controller support
+builder.Services.AddControllers();          // generates attribute-routed controllers
+
+// Swagger still works with controllers
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// CORS policy (React dev server)
 builder.Services.AddCors(o => o.AddPolicy("Dev", p =>
     p.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
      .AllowAnyHeader()
@@ -25,7 +31,15 @@ builder.Services.AddCors(o => o.AddPolicy("Dev", p =>
 
 var app = builder.Build();
 
+// OPTIONAL: auto-apply migrations so tables exist in a fresh DB
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<HosDbContext>();
+    db.Database.Migrate();
+}
+
 app.UseCors("Dev");
+app.UseHttpsRedirection();      // keeps only-HTTPS calls once you enable Kestrel TLS
 
 if (app.Environment.IsDevelopment())
 {
@@ -33,23 +47,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// ─── Endpoints ────────────────────────────────────────────────────────────────
-app.MapGet("/drivers/{id:guid}/hos",
-    async (Guid id, IDriverRepository repo) =>
-        await repo.GetLatestAsync(id) is { } snap
-            ? Results.Ok(snap) : Results.NotFound())
-   .WithName("GetDriverHos")
-   .Produces<DriverHosSnapshot>()
-   .Produces(404);
-
-app.MapPost("/eld/events",
-    async (EldEventBatch batch, IEldNormalizer normalizer, IDriverRepository repo) =>
-    {
-        var snapshots = normalizer.Normalize(batch);
-        await repo.SaveAsync(snapshots);
-        return Results.Accepted();
-    })
-   .WithName("PostEldEvents")
-   .Accepts<EldEventBatch>("application/json");
+// ✨  NEW: hook up attribute-routed controllers
+app.MapControllers();
 
 app.Run();

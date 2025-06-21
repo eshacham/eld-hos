@@ -1,0 +1,21 @@
+using HosDemo.Api.Services;
+using HosDemo.Api.Transport;
+using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("eld/events")]
+public class EldController : ControllerBase
+{
+    private readonly IEldNormalizer _norm;
+    private readonly IDriverRepository _repo;
+    public EldController(IEldNormalizer norm, IDriverRepository repo)
+    { _norm = norm; _repo = repo; }
+
+    [HttpPost]
+    public async Task<IActionResult> Post(EldEventBatch batch)
+    {
+        var snaps = _norm.Normalize(batch);
+        await _repo.SaveAsync(snaps);
+        return Accepted();
+    }
+}
