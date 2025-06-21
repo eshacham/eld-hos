@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HosDemo.Api", "HosDemo.Api\HosDemo.Api.csproj", "{AB531A13-F185-4C0A-B76B-DB6E98D2B5F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HosDemo.Test", "HosDemo.Test\HosDemo.Test.csproj", "{64FFEBA3-AF67-429C-9CFD-7FE3BB6567E9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB531A13-F185-4C0A-B76B-DB6E98D2B5F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB531A13-F185-4C0A-B76B-DB6E98D2B5F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB531A13-F185-4C0A-B76B-DB6E98D2B5F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB531A13-F185-4C0A-B76B-DB6E98D2B5F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64FFEBA3-AF67-429C-9CFD-7FE3BB6567E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64FFEBA3-AF67-429C-9CFD-7FE3BB6567E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64FFEBA3-AF67-429C-9CFD-7FE3BB6567E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64FFEBA3-AF67-429C-9CFD-7FE3BB6567E9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

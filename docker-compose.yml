@@ -1,0 +1,18 @@
+# docker-compose.yml  (root)
+
+services:
+  db:
+    image: postgres         # or your custom image
+    environment:
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: hosdemo
+      POSTGRES_DB:       hosdemo
+    ports: [ "5432:5432" ]
+    volumes: [ "pgdata:/var/lib/postgresql/data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      retries: 5
+
+volumes:
+  pgdata:
