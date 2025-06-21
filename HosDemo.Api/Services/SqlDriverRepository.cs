@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HosDemo.Api.Services;
 
-public class SqlDriverRepository : IDriverRepository
+public class SqlDriverRepository : IHosRepository
 {
     private readonly HosDbContext _db;
     public SqlDriverRepository(HosDbContext db) => _db = db;
