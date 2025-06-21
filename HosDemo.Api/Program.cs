@@ -21,6 +21,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // CORS policy (React dev server)
+// CORS policy (React dev server)
 builder.Services.AddCors(o => o.AddPolicy("Dev", p =>
     p.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
      .AllowAnyHeader()
@@ -35,7 +36,15 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
+// OPTIONAL: auto-apply migrations so tables exist in a fresh DB
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<HosDbContext>();
+    db.Database.Migrate();
+}
+
 app.UseCors("Dev");
+app.UseHttpsRedirection();      // keeps only-HTTPS calls once you enable Kestrel TLS
 app.UseHttpsRedirection();      // keeps only-HTTPS calls once you enable Kestrel TLS
 
 if (app.Environment.IsDevelopment())
