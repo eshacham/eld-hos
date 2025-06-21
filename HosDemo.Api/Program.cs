@@ -18,7 +18,14 @@ builder.Services.AddScoped<IEldNormalizer, SmartNormalizer>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(o => o.AddPolicy("Dev", p =>
+    p.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+     .AllowAnyHeader()
+     .AllowAnyMethod()));
+
 var app = builder.Build();
+
+app.UseCors("Dev");
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,31 +1,45 @@
-// src/components/UpdateHosForm.tsx  (simulates ELD, req #12)
+// src/components/UpdateHosForm.tsx
 import { Button, TextField, Stack } from "@mui/material";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
 
 export function UpdateHosForm() {
+  const qc = useQueryClient();
+
   const mutation = useMutation({
-    mutationFn: (payload) => api.post("/eld/events", payload)
+    mutationFn: (payload: any) => api.post("/eld/events", payload),
+    onSuccess: (_, vars: any) => {
+      // invalidate cache so HosStatusCard refreshes
+      qc.invalidateQueries({ queryKey: ["hos", vars.driverId] });
+    }
   });
 
   return (
-    <Stack spacing={2} component="form" onSubmit={(e) => {
-      e.preventDefault();
-      const form = new FormData(e.currentTarget);
-      const payload = { 
-        vendor: "DemoSim",
-        events: [{
-          driverId: form.get("driverId"),
-          availableHours: Number(form.get("hours")),
-          dutyStatus: form.get("status")
-        }]
-      };
-      mutation.mutate(payload);
-    }}>
+    <Stack
+      spacing={2}
+      component="form"
+      onSubmit={e => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const driverId = fd.get("driverId") as string;
+        mutation.mutate({
+          vendorId: "DemoSim",
+          driverId,
+          events: [{
+            driverId,
+            availableHours: Number(fd.get("hours")),
+            dutyStatus: fd.get("status"),
+            recordedAt: new Date().toISOString()
+          }]
+        });
+      }}
+    >
       <TextField name="driverId" label="Driver ID (GUID)" required />
-      <TextField name="hours"    label="Available Hours" type="number" />
+      <TextField name="hours"    label="Avail. Hours" type="number" />
       <TextField name="status"   label="Duty Status" defaultValue="ON_DUTY" />
-      <Button type="submit" variant="contained">Send</Button>
+      <Button type="submit" variant="contained" disabled={mutation.isPending}>
+        {mutation.isPending ? "Sending…" : "Send"}
+      </Button>
     </Stack>
   );
 }
