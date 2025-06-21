@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 [Route("drivers")]
 public class DriversController : ControllerBase
 {
-    private readonly IDriverRepository _repo;
-    public DriversController(IDriverRepository repo) => _repo = repo;
+    private readonly IHosRepository _repo;
+    public DriversController(IHosRepository repo) => _repo = repo;
 
     [HttpGet("{id:guid}/hos")]
     public async Task<IActionResult> GetHos(Guid id)

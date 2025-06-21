@@ -4,5 +4,5 @@ namespace HosDemo.Api.Transport;
 public class EldEventBatch
 {
     public string VendorId { get; set; } = null!;
-    public List<UpdateDriverHoursOfService> Events { get; set; } = [];
+    public List<UpdateDriverHos> Events { get; set; } = [];
 }

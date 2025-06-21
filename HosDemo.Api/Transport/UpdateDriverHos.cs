@@ -1,7 +1,6 @@
-// Transport/UpdateDriverHoursOfService.cs
 namespace HosDemo.Api.Transport;
 
-public class UpdateDriverHoursOfService
+public class UpdateDriverHos
 {
     public Guid    DriverId              { get; set; }
     public int?    AvailableHours        { get; set; }
