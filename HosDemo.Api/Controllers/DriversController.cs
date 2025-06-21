@@ -1,9 +1,11 @@
-// Controllers/DriversController.cs
+using HosDemo.Api.Security;
 using HosDemo.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("drivers")]
+[Authorize(AuthenticationSchemes = ApiKeyAuthenticationDefaults.AuthenticationScheme)]
 public class DriversController : ControllerBase
 {
     private readonly IHosRepository _repo;

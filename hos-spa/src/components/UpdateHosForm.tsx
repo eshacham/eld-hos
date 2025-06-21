@@ -1,9 +1,8 @@
-// src/components/UpdateHosForm.tsx
 import { Button, TextField, Stack } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../lib/api";
+import { apiWithVendor } from "../lib/api";
 
-interface EldEvent {
+export interface EldEvent {
   driverId: string;
   availableHours?: number;
   availableDrivingTime?: number;
@@ -12,19 +11,24 @@ interface EldEvent {
   dutyStatus?: string;
   recordedAt: string;
 }
-
-interface EldPayload {
+export interface EldPayload {
   vendorId: string;
   events: EldEvent[];
 }
 
-export function UpdateHosForm() {
+export function UpdateHosForm({
+  vendorId,
+  driverId
+}: {
+  vendorId: string;
+  driverId: string;
+}) {
   const qc = useQueryClient();
 
   const mutation = useMutation<unknown, Error, EldPayload>({
-    mutationFn: (payload) => api.post("/eld/events", payload),
-    onSuccess: (_d, vars) =>
-      qc.invalidateQueries({ queryKey: ["hos", vars.events[0].driverId] })
+    mutationFn: (payload) => apiWithVendor(vendorId).post("/eld/events", payload),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: ["hos", driverId, vendorId] })
   });
 
   return (

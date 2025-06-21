@@ -1,6 +1,9 @@
 using HosDemo.Api.Data;
 using HosDemo.Api.Services;
+using HosDemo.Api.Security;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,31 +24,35 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // CORS policy (React dev server)
-// CORS policy (React dev server)
 builder.Services.AddCors(o => o.AddPolicy("Dev", p =>
     p.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
      .AllowAnyHeader()
      .AllowAnyMethod()));
 
+builder.Services.AddSingleton<ApiKeyStore>();  
+builder.Services
+    .AddAuthentication(ApiKeyAuthenticationDefaults.AuthenticationScheme)
+    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+        ApiKeyAuthenticationDefaults.AuthenticationScheme, _ => { });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
-// OPTIONAL: auto-apply migrations so tables exist in a fresh DB
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<HosDbContext>();
-    db.Database.Migrate();
-}
-
-// OPTIONAL: auto-apply migrations so tables exist in a fresh DB
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<HosDbContext>();
-    db.Database.Migrate();
-}
-
 app.UseCors("Dev");
-app.UseHttpsRedirection();      // keeps only-HTTPS calls once you enable Kestrel TLS
-app.UseHttpsRedirection();      // keeps only-HTTPS calls once you enable Kestrel TLS
+
+// OPTIONAL: auto-apply migrations so tables exist in a fresh DB
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<HosDbContext>();
+    db.Database.Migrate();
+}
+
+app.UseAuthentication(); // ⬅️ before UseAuthorization
+app.UseAuthorization();
+
+// app.UseHttpsRedirection();      // keeps only-HTTPS calls once you enable Kestrel TLS
+
 
 if (app.Environment.IsDevelopment())
 {

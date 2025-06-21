@@ -1,19 +1,28 @@
 import { useState } from "react";
 import { Container, Box } from "@mui/material";
+import { VendorSelect } from "./components/VendorSelect";
+import { DriverSearch } from "./components/DriverSearch";
 import { HosStatusCard } from "./components/HosStatusCard";
 import { UpdateHosForm } from "./components/UpdateHosForm";
-import { DriverSearch } from "./components/DriverSearch";
 
 export default function App() {
-  const [driverId, setDriverId] = useState("");
+  const [vendorId, setVendorId]   = useState("DemoSim");
+  const [driverId, setDriverId]   = useState("");
 
   return (
     <Container sx={{ mt: 4 }}>
+      <VendorSelect value={vendorId} onChange={setVendorId} />
+      <Box sx={{ my: 2 }} />
       <DriverSearch onSelect={setDriverId} />
-      <Box sx={{ my: 4 }} />
-      {driverId && <HosStatusCard driverId={driverId} />}
-      <Box sx={{ my: 4 }} />
-      <UpdateHosForm />
+
+      {driverId && (
+        <>
+          <Box sx={{ my: 2 }} />
+          <HosStatusCard vendorId={vendorId} driverId={driverId} />
+          <Box sx={{ my: 2 }} />
+          <UpdateHosForm vendorId={vendorId} driverId={driverId} />
+        </>
+      )}
     </Container>
   );
 }
