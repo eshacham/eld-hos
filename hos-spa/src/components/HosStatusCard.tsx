@@ -13,7 +13,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import React from "react";
-import { apiWithVendor } from "../lib/api";
+import { apiClient } from "../lib/api";
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 // Define a keyframe animation for the spinning effect
@@ -58,7 +58,7 @@ export const HosStatusCard = React.memo(function HosStatusCard({
     queryKey: ["hos", driverId, vendorId],
     queryFn: () => {
       console.log(`[HosStatusCard] Fetching HOS data for driverId: ${driverId}`); 
-      return apiWithVendor(vendorId)
+      return apiClient
         .get(`/drivers/${driverId}/hos`)
         .then((r) => r.data)
     },

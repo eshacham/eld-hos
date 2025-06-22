@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useState, useCallback, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiWithVendor } from "../lib/api";
+import { apiClient } from "../lib/api";
 import { AxiosError } from "axios";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import React from "react";
@@ -68,7 +68,7 @@ export const UpdateHosForm = React.memo(function UpdateHosForm({
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
 const { mutate, isPending } = useMutation<unknown, AxiosError, EldPayload>({
-  mutationFn: (payload) => apiWithVendor(vendorId).post("/eld/events", payload),
+  mutationFn: (payload) => apiClient.post("/eld/events", payload),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSuccess: (_resp, _vars) => { 
     // Invalidate the 'hos' query for the specific driver/vendor.

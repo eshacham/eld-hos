@@ -1,8 +1,6 @@
 using HosDemo.Api.Data;
 using HosDemo.Api.Services;
-using HosDemo.Api.Security;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,14 +27,6 @@ builder.Services.AddCors(o => o.AddPolicy("Dev", p =>
      .AllowAnyHeader()
      .AllowAnyMethod()));
 
-builder.Services.AddSingleton<ApiKeyStore>();  
-builder.Services
-    .AddAuthentication(ApiKeyAuthenticationDefaults.AuthenticationScheme)
-    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
-        ApiKeyAuthenticationDefaults.AuthenticationScheme, _ => { });
-
-builder.Services.AddAuthorization();
-
 var app = builder.Build();
 
 app.UseCors("Dev");
@@ -47,9 +37,6 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<HosDbContext>();
     db.Database.Migrate();
 }
-
-app.UseAuthentication(); // ⬅️ before UseAuthorization
-app.UseAuthorization();
 
 // app.UseHttpsRedirection();      // keeps only-HTTPS calls once you enable Kestrel TLS
 
