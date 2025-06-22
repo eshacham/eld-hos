@@ -9,28 +9,24 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 const availableVendors = ["DemoSim", "KEEPTRUCKIN", "SAM_SAT"] as const;
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext"; // Ensure useAuth is imported
 
 export function LoginForm() {
-  const { login } = useAuth();
+  const { login, isLoggingIn } = useAuth();
   const [vendorId, setVendorId] = useState<string>(availableVendors[0]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
     try {
       await login(vendorId, username, password);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Login failed";
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+      const errorMessage = err instanceof Error ? err.message : "Login failed"; // Error handling for login failure
+      setError(errorMessage); // Set error message
     }
   };
 
@@ -78,10 +74,10 @@ export function LoginForm() {
           <Button
             type="submit"
             variant="contained"
-            disabled={loading}
+            disabled={isLoggingIn}
             fullWidth
           >
-            {loading ? "Logging in..." : "Login"}
+             {isLoggingIn ? "Logging in..." : "Login"}
           </Button>
         </Stack>
       </form>

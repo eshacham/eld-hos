@@ -1,10 +1,19 @@
 import { Container } from "@mui/material";
 import { LoginForm } from "./components/LoginForm";
 import { AuthenticatedApp } from "./components/AuthenticatedApp";
-import { useAuth } from "./contexts/AuthContext";
+import { useAuth } from "./contexts/AuthContext"; // Ensure useAuth is imported
+import { CircularProgress } from "@mui/material"; // Import for loading indicator
 
 export default function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isInitializing } = useAuth();
+
+  if (isInitializing) {
+    return (
+      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -13,6 +22,5 @@ export default function App() {
       </Container>
     );
   }
-
   return <AuthenticatedApp />;
 }
