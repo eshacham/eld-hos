@@ -1,7 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+// Create a query cache with a global error handler
+const queryCache = new QueryCache({
+  onError: (error) => {
+    console.error("A global query error occurred:", error);
+  },
+});
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -15,13 +23,15 @@ const qc = new QueryClient({
     mutations: {
       retry: false               // no extra POST attempts
     }
-  }
+  },
+  queryCache, // Pass the queryCache instance here
 });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={qc}>
       <App />
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </React.StrictMode>
 );
