@@ -3,6 +3,7 @@ import {
   TextField,
   Stack,
   ToggleButton,
+  Snackbar,
   ToggleButtonGroup,
   Tooltip,
   Box
@@ -11,6 +12,8 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiWithVendor } from "../lib/api";
 import { AxiosError } from "axios";
+import MuiAlert, { type AlertProps } from "@mui/material/Alert";
+import React from "react";
 
 
 const dutyOptions = [
@@ -42,8 +45,18 @@ export function UpdateHosForm({
   vendorId: string;
   driverId: string;
 }) {
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
   const qc = useQueryClient();
   const [dutyStatus, setDutyStatus] = useState(dutyOptions[0]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
 const mutation = useMutation<unknown, AxiosError, EldPayload>({
   mutationFn: (payload) => apiWithVendor(vendorId).post("/eld/events", payload),
@@ -55,6 +68,14 @@ const mutation = useMutation<unknown, AxiosError, EldPayload>({
       ...old,
       ...newSnap
     }));
+    setSnackbarMessage("Event posted successfully!");
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
+  },
+  onError: (error) => {
+    setSnackbarMessage(`Error posting event: ${error.message}`);
+    setSnackbarSeverity("error");
+    setSnackbarOpen(true);
   }
 });
 
@@ -70,6 +91,10 @@ const mutation = useMutation<unknown, AxiosError, EldPayload>({
         const form = e.currentTarget as HTMLFormElement;
         const fd = new FormData(e.currentTarget);
         mutation.mutate({
+          // Basic validation: ensure required fields are not empty
+          // More complex validation can be added with a form library
+          // if (!fd.get("availableHours") || !fd.get("drvTime") || !fd.get("dutyTime") || !fd.get("cycle")) {
+          //   setSnackbarMessage("Please fill all numeric fields."); setSnackbarSeverity("error"); setSnackbarOpen(true); return; }
           vendorId,
           events: [
             {
@@ -84,7 +109,7 @@ const mutation = useMutation<unknown, AxiosError, EldPayload>({
           ]
         }, {
          onSuccess: () => {
-          form.reset();           // ⬅️ clears numeric inputs
+          form.reset(); // ⬅️ clears numeric inputs
           setDutyStatus(dutyOptions[0]); // reset toggle
         }
         });
@@ -119,10 +144,26 @@ const mutation = useMutation<unknown, AxiosError, EldPayload>({
         }}
       >
         <TextField name="availableHours" label="Avail. Hours" type="number" />
-        <TextField name="drvTime" label="Driving Time" type="number" />
-        <TextField name="dutyTime" label="On-Duty Time" type="number" />
-        <TextField name="cycle" label="60/70 Cycle" type="number" />
+        <TextField name="drvTime" label="Driving Time" type="number" required />
+        <TextField name="dutyTime" label="On-Duty Time" type="number" required />
+        <TextField name="cycle" label="60/70 Cycle" type="number" required />
       </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
 
       {/* duty-status selector */}
       <Tooltip title="Select duty status">
