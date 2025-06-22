@@ -1,5 +1,5 @@
-// src/components/VendorSelect.tsx
-import { MenuItem, TextField } from "@mui/material";
+import { MenuItem, TextField, Tooltip } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
 import { vendorKeys } from "../vendorKeys";
 
 export function VendorSelect({
@@ -7,22 +7,28 @@ export function VendorSelect({
   onChange
 }: {
   value: string;
-  onChange: (v: string) => void;
+  onChange: (vendor: string) => void;
 }) {
   return (
-    <TextField
-      select
-      label="Vendor"
-      size="small"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      sx={{ minWidth: 160 }}
-    >
-      {Object.keys(vendorKeys).map((id) => (
-        <MenuItem key={id} value={id}>
-          {id}
-        </MenuItem>
-      ))}
-    </TextField>
+    <>
+      <TextField
+        select
+        label="Vendor (sets API key)"
+        size="small"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        sx={{ minWidth: 220, mr: 1 }}
+      >
+        {Object.keys(vendorKeys).map((v) => (
+          <MenuItem key={v} value={v}>
+            {v}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      <Tooltip title="Vendor determines which secret API key is sent on POST">
+        <InfoIcon fontSize="small" color="action" />
+      </Tooltip>
+    </>
   );
 }

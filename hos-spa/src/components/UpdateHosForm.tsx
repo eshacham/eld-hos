@@ -1,20 +1,23 @@
-import { Button, TextField, Stack } from "@mui/material";
+// src/components/UpdateHosForm.tsx
+import {
+  Button,
+  TextField,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Box
+} from "@mui/material";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiWithVendor } from "../lib/api";
 
-export interface EldEvent {
-  driverId: string;
-  availableHours?: number;
-  availableDrivingTime?: number;
-  availableOnDutyTime?: number;
-  available6070?: number;
-  dutyStatus?: string;
-  recordedAt: string;
-}
-export interface EldPayload {
-  vendorId: string;
-  events: EldEvent[];
-}
+const dutyOptions = [
+  "OFF-DUTY",
+  "SLEEPER BERTH",
+  "DRIVING",
+  "ON-DUTY NOT DRIVING"
+];
 
 export function UpdateHosForm({
   vendorId,
@@ -24,57 +27,97 @@ export function UpdateHosForm({
   driverId: string;
 }) {
   const qc = useQueryClient();
+  const [dutyStatus, setDutyStatus] = useState(dutyOptions[0]);
 
-  const mutation = useMutation<unknown, Error, EldPayload>({
-    mutationFn: (payload) => apiWithVendor(vendorId).post("/eld/events", payload),
+  const mutation = useMutation({
+    mutationFn: (p: any) => apiWithVendor(vendorId).post("/eld/events", p),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ["hos", driverId, vendorId] })
   });
 
+  const num = (fd: FormData, k: string) =>
+    fd.get(k) ? Number(fd.get(k)) : undefined;
+
   return (
     <Stack
-      spacing={2}
       component="form"
+      spacing={2}
       onSubmit={(e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
-
-        const vendorId   = (fd.get("vendorId") as string).trim();
-        const driverId   = (fd.get("driverId") as string).trim();
-        const parseNum   = (key: string) =>
-          fd.get(key) ? Number(fd.get(key)) : undefined;
-
         mutation.mutate({
           vendorId,
           events: [
             {
               driverId,
-              availableHours:       parseNum("hours"),
-              availableDrivingTime: parseNum("driveTime"),
-              availableOnDutyTime:  parseNum("dutyTime"),
-              available6070:        parseNum("cycle"),
-              dutyStatus: (fd.get("status") as string) || undefined,
+              availableHours:       num(fd, "availableHours"),
+              availableDrivingTime: num(fd, "drvTime"),
+              availableOnDutyTime:  num(fd, "dutyTime"),
+              available6070:        num(fd, "cycle"),
+              dutyStatus,
               recordedAt: new Date().toISOString()
             }
           ]
         });
       }}
     >
-      {/* Vendor & Driver */}
-      <TextField name="vendorId" label="Vendor ID" defaultValue="DemoSim" required />
-      <TextField name="driverId" label="Driver ID (GUID)" required />
+      {/* read-only context fields */}
+      <Stack direction="row" spacing={2}>
+        <TextField
+          label="Vendor"
+          value={vendorId}
+          fullWidth
+          variant="filled"
+          InputProps={{ readOnly: true }}
+          sx={{ bgcolor: "action.disabledBackground" }}
+        />
+        <TextField
+          label="Driver ID"
+          value={driverId}
+          fullWidth
+          variant="filled"
+          InputProps={{ readOnly: true }}
+          sx={{ bgcolor: "action.disabledBackground" }}
+        />
+      </Stack>
 
-      {/* Numeric HOS fields */}
-      <TextField name="hours"     label="Avail. Hours"          type="number" />
-      <TextField name="driveTime" label="Avail. Driving Time"   type="number" />
-      <TextField name="dutyTime"  label="Avail. On-Duty Time"   type="number" />
-      <TextField name="cycle"     label="Avail. 60/70 Cycle"    type="number" />
+      {/* numeric fields in two columns */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+          gap: 2
+        }}
+      >
+        <TextField name="availableHours" label="Avail. Hours" type="number" />
+        <TextField name="drvTime" label="Driving Time" type="number" />
+        <TextField name="dutyTime" label="On-Duty Time" type="number" />
+        <TextField name="cycle" label="60/70 Cycle" type="number" />
+      </Box>
 
-      {/* Duty status */}
-      <TextField name="status"    label="Duty Status"           defaultValue="ON_DUTY" />
+      {/* duty-status selector */}
+      <Tooltip title="Select duty status">
+        <ToggleButtonGroup
+          value={dutyStatus}
+          exclusive
+          onChange={(_, v) => v && setDutyStatus(v)}
+          fullWidth
+          color="primary"
+        >
+          {dutyOptions.map((opt) => (
+            <ToggleButton key={opt} value={opt}>
+              {opt}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Tooltip>
 
-      <Button type="submit" variant="contained" disabled={mutation.isPending}>
-        {mutation.isPending ? "Sending…" : "Send"}
+      <Button
+        type="submit"
+        variant="contained"
+        disabled={mutation.isPending}
+      >
+        {mutation.isPending ? "Sending…" : "Send Event"}
       </Button>
     </Stack>
   );
