@@ -13,7 +13,7 @@ public class SmartNormalizer : IEldNormalizer
         {
             ["KEEPTRUCKIN"] = e => MapKt(e),
             ["SAM_SAT"] = e => MapSamsung(e),
-            ["DemoSim"] = e => MapDemo(e)      // default for React form
+            ["DemoSim"] = e => MapDemo(e)      
         };
     }
 

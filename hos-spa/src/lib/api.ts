@@ -1,5 +1,5 @@
 import axios from "axios";
-import { AxiosError } from "axios"; // Import AxiosError for type checking
+import { AxiosError } from "axios";
 
 // API client with session management
 const api = axios.create({
@@ -83,7 +83,7 @@ export const apiClient = {
   get: (path: string) => {
     return api.get(path);
   },
-  post: (path: string, data: any) => {
+  post: (path: string, data: unknown) => {
     return api.post(path, data);
   }
 };

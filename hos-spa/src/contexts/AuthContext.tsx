@@ -47,9 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const responseData = await loginVendor(vendor, username, password);
       setVendorId(responseData.vendorId); // Use vendorId from the API response
       setIsAuthenticated(true);
-    } catch (error) {
-      // Re-throw the error so the form can catch it and display a message
-      throw error;
     } finally {
       // This will run whether the login succeeds or fails
       setIsLoggingIn(false);
@@ -76,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -148,7 +148,7 @@ const { mutate, isPending } = useMutation<unknown, AxiosError, EldPayload>({
           label="Driver ID"
           value={driverId}
           fullWidth
-          variant="filled" // Fixed typo: InputProps -> slotProps
+          variant="filled" 
           slotProps={{ htmlInput: { readOnly: true } }}
           sx={{ bgcolor: "action.disabledBackground" }}
         />

@@ -1,8 +1,8 @@
 import { Container } from "@mui/material";
 import { LoginForm } from "./components/LoginForm";
 import { AuthenticatedApp } from "./components/AuthenticatedApp";
-import { useAuth } from "./contexts/AuthContext"; // Ensure useAuth is imported
-import { CircularProgress } from "@mui/material"; // Import for loading indicator
+import { useAuth } from "./contexts/AuthContext";
+import { CircularProgress } from "@mui/material";
 
 export default function App() {
   const { isAuthenticated, isInitializing } = useAuth();

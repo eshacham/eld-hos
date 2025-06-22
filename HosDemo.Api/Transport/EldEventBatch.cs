@@ -1,4 +1,3 @@
-// Transport/EldEventBatch.cs
 namespace HosDemo.Api.Transport;
 
 public class EldEventBatch

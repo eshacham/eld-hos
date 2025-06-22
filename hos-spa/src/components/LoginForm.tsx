@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 const availableVendors = ["DemoSim", "KEEPTRUCKIN", "SAM_SAT"] as const;
-import { useAuth } from "../contexts/AuthContext"; // Ensure useAuth is imported
+import { useAuth } from "../contexts/AuthContext"; 
 
 export function LoginForm() {
   const { login, isLoggingIn } = useAuth();
