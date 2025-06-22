@@ -8,12 +8,22 @@ import {
   Tooltip,
   Box
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiWithVendor } from "../lib/api";
 import { AxiosError } from "axios";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import React from "react";
+
+
+// 1. Define components outside the rendering component.
+// This prevents React from unmounting and remounting the Alert on every render of UpdateHosForm.
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 
 const dutyOptions = [
@@ -38,20 +48,20 @@ interface EldPayload {
   events: EldEvent[];
 }
 
-export function UpdateHosForm({
+// 2. Move pure helper functions outside the component.
+// This function has no dependencies on props or state, so it can be a standalone utility.
+const num = (fd: FormData, k: string) =>
+  fd.get(k) ? Number(fd.get(k)) : undefined;
+
+// 3. Wrap the component in React.memo.
+// This prevents re-renders if the parent re-renders but the props (vendorId, driverId) have not changed.
+export const UpdateHosForm = React.memo(function UpdateHosForm({
   vendorId,
   driverId
 }: {
   vendorId: string;
   driverId: string;
 }) {
-  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref,
-  ) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-  });
-
   const qc = useQueryClient();
   const [dutyStatus, setDutyStatus] = useState(dutyOptions[0]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -61,13 +71,11 @@ export function UpdateHosForm({
 const mutation = useMutation<unknown, AxiosError, EldPayload>({
   mutationFn: (payload) => apiWithVendor(vendorId).post("/eld/events", payload),
   onSuccess: (_resp, vars) => {
-    const newSnap = vars.events[0];
-    qc.setQueryData<EldEvent | undefined>(
-      ["hos", driverId, vendorId], 
-      (old) => ({
-      ...old,
-      ...newSnap
-    }));
+    // Invalidate the 'hos' query for the specific driver/vendor.
+    // This marks it as stale and forces a refetch the next time it's observed
+    // (e.g., when HosStatusCard is rendered or if it's already active).
+    qc.invalidateQueries({ queryKey: ["hos", driverId, vendorId] });
+
     setSnackbarMessage("Event posted successfully!");
     setSnackbarSeverity("success");
     setSnackbarOpen(true);
@@ -79,17 +87,12 @@ const mutation = useMutation<unknown, AxiosError, EldPayload>({
   }
 });
 
-  const num = (fd: FormData, k: string) =>
-    fd.get(k) ? Number(fd.get(k)) : undefined;
-
-  return (
-    <Stack
-      component="form"
-      spacing={2}
-      onSubmit={(e) => {
+  // 4. Memoize event handlers with useCallback.
+  // This ensures the function reference is stable across re-renders, which is a best practice.
+  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const form = e.currentTarget as HTMLFormElement;
-        const fd = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
         mutation.mutate({
           // Basic validation: ensure required fields are not empty
           // More complex validation can be added with a form library
@@ -112,8 +115,20 @@ const mutation = useMutation<unknown, AxiosError, EldPayload>({
           form.reset(); // ⬅️ clears numeric inputs
           setDutyStatus(dutyOptions[0]); // reset toggle
         }
-        });
-      }}
+    });
+  }, [vendorId, driverId, dutyStatus, mutation]); // Dependencies ensure the function updates when these values change.
+
+  const handleDutyStatusChange = useCallback((_event: React.MouseEvent<HTMLElement>, newValue: string | null) => {
+    if (newValue) {
+      setDutyStatus(newValue);
+    }
+  }, []); // setDutyStatus is stable, so no dependencies are needed.
+
+  return (
+    <Stack
+      component="form"
+      spacing={2}
+      onSubmit={handleSubmit}
     >
       {/* read-only context fields */}
       <Stack direction="row" spacing={2}>
@@ -170,7 +185,7 @@ const mutation = useMutation<unknown, AxiosError, EldPayload>({
         <ToggleButtonGroup
           value={dutyStatus}
           exclusive
-          onChange={(_, v) => v && setDutyStatus(v)}
+          onChange={handleDutyStatusChange}
           fullWidth
           color="primary"
         >
@@ -191,4 +206,4 @@ const mutation = useMutation<unknown, AxiosError, EldPayload>({
       </Button>
     </Stack>
   );
-}
+});
