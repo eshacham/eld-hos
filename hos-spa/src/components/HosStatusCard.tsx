@@ -1,10 +1,9 @@
-// src/components/HosStatusCard.tsx
 import {
   Card, CardContent, Typography, CircularProgress, Stack, Chip
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { apiWithVendor } from "../lib/api";
+import { AxiosError } from "axios";
 
 type Snapshot = {
   dutyStatus: string | null;
@@ -33,13 +32,12 @@ export function HosStatusCard({
   vendorId: string;
 }) {
   const { data, isLoading, error } = useQuery<Snapshot, AxiosError>({
-    queryKey: ["hos", driverId, vendorId],
-    queryFn: () =>
-      apiWithVendor(vendorId)
-        .get(`/drivers/${driverId}/hos`)
-        .then((r) => r.data),
-    enabled: !!driverId
-  });
+  queryKey: ["hos", driverId, vendorId],
+  queryFn: () =>
+    apiWithVendor(vendorId).get(`/drivers/${driverId}/hos`).then(r => r.data),
+  enabled: !!driverId,     // still only runs when driver loaded
+  staleTime: 300_000       // redundant, but explicit
+});
 
   if (isLoading) return <CircularProgress />;
 

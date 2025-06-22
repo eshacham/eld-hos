@@ -1,4 +1,3 @@
-// src/components/UpdateHosForm.tsx
 import {
   Button,
   TextField,
@@ -11,6 +10,8 @@ import {
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiWithVendor } from "../lib/api";
+import { AxiosError } from "axios";
+
 
 const dutyOptions = [
   "OFF-DUTY",
@@ -18,6 +19,21 @@ const dutyOptions = [
   "DRIVING",
   "ON-DUTY NOT DRIVING"
 ];
+
+interface EldEvent {
+  driverId: string;
+  availableHours?: number;
+  availableDrivingTime?: number;
+  availableOnDutyTime?: number;
+  available6070?: number;
+  dutyStatus: string;
+  recordedAt: string;
+}
+
+interface EldPayload {
+  vendorId: string;
+  events: EldEvent[];
+}
 
 export function UpdateHosForm({
   vendorId,
@@ -29,11 +45,18 @@ export function UpdateHosForm({
   const qc = useQueryClient();
   const [dutyStatus, setDutyStatus] = useState(dutyOptions[0]);
 
-  const mutation = useMutation({
-    mutationFn: (p: any) => apiWithVendor(vendorId).post("/eld/events", p),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["hos", driverId, vendorId] })
-  });
+const mutation = useMutation<unknown, AxiosError, EldPayload>({
+  mutationFn: (payload) => apiWithVendor(vendorId).post("/eld/events", payload),
+  onSuccess: (_resp, vars) => {
+    const newSnap = vars.events[0];
+    qc.setQueryData<EldEvent | undefined>(
+      ["hos", driverId, vendorId], 
+      (old) => ({
+      ...old,
+      ...newSnap
+    }));
+  }
+});
 
   const num = (fd: FormData, k: string) =>
     fd.get(k) ? Number(fd.get(k)) : undefined;
@@ -44,6 +67,7 @@ export function UpdateHosForm({
       spacing={2}
       onSubmit={(e) => {
         e.preventDefault();
+        const form = e.currentTarget as HTMLFormElement;
         const fd = new FormData(e.currentTarget);
         mutation.mutate({
           vendorId,
@@ -58,6 +82,11 @@ export function UpdateHosForm({
               recordedAt: new Date().toISOString()
             }
           ]
+        }, {
+         onSuccess: () => {
+          form.reset();           // ⬅️ clears numeric inputs
+          setDutyStatus(dutyOptions[0]); // reset toggle
+        }
         });
       }}
     >
