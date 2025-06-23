@@ -5,8 +5,12 @@ import {
   Typography,
   Box,
   Chip,
-  Button
+  Button,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { DriverSearch } from "./DriverSearch";
 import { HosStatusCard } from "./HosStatusCard";
 import { UpdateHosForm } from "./UpdateHosForm";
@@ -54,12 +58,20 @@ export function AuthenticatedApp() {
 
       {/* ELD event poster */}
       {driverId && (
-        <Paper sx={{ p: 2 }} variant="outlined">
-          <Typography variant="h6" gutterBottom>
-            Simulate ELD Event
-          </Typography>
-          <UpdateHosForm vendorId={vendorId} driverId={driverId} />
-        </Paper>
+        <Accordion defaultExpanded={false}>
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="eld-form-content"
+            id="eld-form-header"
+          >
+            <Typography variant="h6">
+              Simulate ELD Event
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <UpdateHosForm vendorId={vendorId} driverId={driverId} />
+          </AccordionDetails>
+        </Accordion>
       )}
     </Container>
   );
