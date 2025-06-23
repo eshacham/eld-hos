@@ -43,7 +43,7 @@ const dutyColors: Record<string, "default" | "success" | "warning" | "info"> = {
 };
 
 const show = (v: number | null | undefined, unit = "") =>
-  v == null ? "N/A" : `${v}${unit}`;
+  v == null ? "N/A" : `${Number(v).toFixed(2)}${unit}`;
 
 // Wrap in React.memo for performance optimization.
 // This prevents re-renders if the parent re-renders but props haven't changed.

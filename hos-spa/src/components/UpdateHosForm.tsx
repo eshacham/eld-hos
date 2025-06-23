@@ -163,9 +163,9 @@ const { mutate, isPending } = useMutation<unknown, AxiosError, EldPayload>({
         }}
       >
         <TextField name="availableHours" label="Avail. Hours" type="number" />
-        <TextField name="drvTime" label="Driving Time" type="number" required />
-        <TextField name="dutyTime" label="On-Duty Time" type="number" required />
-        <TextField name="cycle" label="60/70 Cycle" type="number" required />
+        <TextField name="drvTime" label="Driving Time" type="number" slotProps={{ htmlInput: { step: "0.25" } }} required />
+        <TextField name="dutyTime" label="On-Duty Time" type="number" slotProps={{ htmlInput: { step: "0.25" } }} required />
+        <TextField name="cycle" label="60/70 Cycle" type="number" slotProps={{ htmlInput: { step: "0.25" } }} required />
       </Box>
 
       <Snackbar

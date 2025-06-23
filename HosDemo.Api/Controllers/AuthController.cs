@@ -22,14 +22,8 @@ public class AuthController : ControllerBase
 
     private static bool IsValidVendorUser(string vendorId, string username, string password)
     {
-        // Hardcoded vendor-specific credentials for demo
-        return vendorId switch
-        {
-            "DemoSim" => username == "demo_user" && password == "demo_pass",
-            "KEEPTRUCKIN" => username == "kt_admin" && password == "kt_secure",
-            "SAM_SAT" => username == "sam_user" && password == "sam_pass",
-            _ => false
-        };
+        // Hardcoded credentials for demo
+        return username == "user" && password == "pass";
     }
 
     [HttpPost("logout")]

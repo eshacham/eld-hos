@@ -80,14 +80,7 @@ export function LoginForm() {
              {isLoggingIn ? "Logging in..." : "Login"}
           </Button>
         </Stack>
-      </form>
-
-      <Typography variant="caption" sx={{ mt: 2, display: "block" }}>
-        Demo credentials:
-        <br />• DemoSim: demo_user / demo_pass
-        <br />• KEEPTRUCKIN: kt_admin / kt_secure  
-        <br />• SAM_SAT: sam_user / sam_pass
-      </Typography>
+      </form>      
     </Paper>
   );
 }
